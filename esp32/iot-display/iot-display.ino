@@ -15,13 +15,21 @@
 // Include WiFi credentials
 #include "wifi_credentials.h"
 
+// Include settings for Wifi and AWs IOT.
+#include "settings.h"
+
+// WiFi connection handler.
+#include "WiFiConnection.h"
+static WiFiConnection wifi = WiFiConnection(WIFI_SSID, WIFI_PASSWORD, MAX_WIFI_CONNECT_ATTEMPS);
 
 
 void setup() {
 
+  wifi.connect();
 }
 
 void loop() {
 
-
+  delay(5000);
+  wifi.disconnect();
 }
