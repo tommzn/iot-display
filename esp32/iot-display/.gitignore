@@ -1,4 +1,5 @@
 # Use 'git update-index --skip-worktree aws_iot_certs.h wifi_credentials.h settings.h' to skip local changes
+# Undo with 'git update-index --no-skip-worktree <file>', to continue tracking changes
 aws_iot_certs.h
 wifi_credentials.h
 settings.h
