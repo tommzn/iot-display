@@ -1,3 +1,8 @@
+
+#ifndef SETTINGS_H
+#define SETTINGS_H
+
+
 // Factors to convert seconds to milli and nicro settings
 #define uS_TO_S_FACTOR 1000000ULL
 #define mS_TO_S_FACTOR 1000
@@ -14,5 +19,7 @@
 // AWS IOT settings
 const char AWS_IOT_THING_NAME[] = "<AWS IOT Thing Name>";
 const char AWS_IOT_ENDPOINT[]   = "<your endpoint>-ats.iot.<region>.amazonaws.com";
+const char AWS_IOT_LOG_TOPIC[]  = "iot-display/logs";
 
+#endif
   

@@ -10,9 +10,6 @@
  */
 #include <Preferences.h>
 
-// Include AWS IOT devices certificates
-#include "aws_iot_certs.h"
-
 // Include WiFi credentials
 #include "wifi_credentials.h"
 
@@ -21,6 +18,10 @@
 
 // Include persistence mananger for settings.
 #include "nvs.h"
+
+// Include AWS IOT client.
+#include "aws_iot_client.h"
+AwsIotClient aws_iot_client;
 
 // WiFi connection handler.
 #include "WiFiConnection.h"
@@ -49,18 +50,28 @@ void setup() {
   Serial.begin(115200);
   Serial.println("");
 
-  
   // Start settings manager
   settings.begin();
 
   // Try to connect to WiFi with given settings and credentials
   wifi.connect();
+
+  if (wifi.connected()) {
+      if (aws_iot_client.connect()) {
+        Serial.println("Connected to AWS IOT!");
+      } else {
+        Serial.println("Unable to connect to AWS IOT!");
+      }
+  }
 }
 
 void loop() {
 
   delay(500);
 
+  // Disconnect from AWS IOT
+  aws_iot_client.disconnect();
+  
   // Disconnect from WiFi
   wifi.disconnect();
 
