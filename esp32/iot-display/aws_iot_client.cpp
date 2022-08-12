@@ -26,9 +26,9 @@ bool AwsIotClient::connect() {
 
   if (m_iot_client.connected()) {
     m_iot_client.subscribe(m_content_topic);
-    m_iot_client.subscribe(m_shadow_get_accepted_topic);
-    m_iot_client.subscribe(m_shadow_reject_get_topic);
-    m_iot_client.subscribe(m_shadow_reject_update_topic);
+    m_iot_client.subscribe(getDeviceShadowTopic("/get/accepted"));
+    m_iot_client.subscribe(getDeviceShadowTopic("/get/rejected"));
+    m_iot_client.subscribe(getDeviceShadowTopic("/update/rejected"));
   }  
   return m_iot_client.connected();
 }

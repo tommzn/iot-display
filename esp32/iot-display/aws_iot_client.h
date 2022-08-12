@@ -44,23 +44,19 @@ private:
   uint32_t m_max_connect_attemps = AWS_IOT_MAX_CONNECT_ATTEMPS;
 
   // AWS IOT thing name for this device.
-  const char* m_thing_name = AWS_IOT_THING_NAME;
+  const char* m_thing_name = "<AWS IOT Thing Name>";
+
+  // Name of used AWS IOT device shadow.
+  const char* m_device_shadow_name = "settings";
 
   // Your AWS IOT Core endpoint. Region specific.
-  const char* m_iot_endpoint = AWS_IOT_ENDPOINT;
+  const char* m_iot_endpoint = "<your endpoint>-ats.iot.<region>.amazonaws.com";
 
   // Topic log messages will be send to.
-  const char* m_log_topic = AWS_IOT_LOG_TOPIC;
+  const char* m_log_topic = "logs";
 
   // Topic this device subsribes to, to get new content for display updates.
-  const char* m_content_topic = AWS_IOT_CONTENT_TOPIC;
-
-  // AWS IOT shadow topics.
-  const char* m_shadow_get_topic           = AWS_IOT_SHADOW_GET_TOPIC;
-  const char* m_shadow_get_accepted_topic  = AWS_IOT_SHADOW_GET_ACCEPTED_TOPIC;
-  const char* m_shadow_update_topic        = AWS_IOT_SHADOW_UPDATE_TOPIC;
-  const char* m_shadow_reject_get_topic    = AWS_IOT_SHADOW_REJECT_GET_TOPIC;
-  const char* m_shadow_reject_update_topic = AWS_IOT_SHADOW_REJECT_UPDATE_TOPIC;
+  const char* m_content_topic = "contents";
 
   // Keep connection alive for given seconds, in case send/retrieve data take a little bit longer.
   uint32_t m_connection_keep_alive = 60;
@@ -70,8 +66,15 @@ private:
   
   // Trigger GET topic for shadow device to initiate distribution of current shadow state.
   void triggerShadowGet() {
-    m_iot_client.publish(m_shadow_get_topic, "");
+    m_iot_client.publish(getDeviceShadowTopic("/get"), "");
   };
+
+  // Creates device shadow topics.
+  // General format: $aws/things/<ThingName>/shadow/name/<ShadowName>/<Action>
+  const char* getDeviceShadowTopic(std::string action) {
+    return ("$aws/things/" + std::string(m_thing_name) + "/shadow/name/" + std::string(m_device_shadow_name) + action).c_str();
+  }
+  
   
 };
 #endif
