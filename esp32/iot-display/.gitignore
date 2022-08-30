@@ -3,3 +3,4 @@
 aws_iot_certs.h
 wifi_credentials.h
 settings.h
+aws_iot_settings.h
