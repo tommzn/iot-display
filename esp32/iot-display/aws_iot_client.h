@@ -11,11 +11,20 @@ public:
 
   AwsIotClient() { };
 
+  AwsIotClient(char* iot_endpoint) { 
+    m_iot_endpoint = iot_endpoint;
+  };
+
   // Opens a secure connections to AWS IOT to publish/consume messages.
   bool connect();
 
   // Closed current connection to AWS IOT.
   bool disconnect();
+
+  // Get connection status.
+  bool isConnected() {
+    return m_iot_client.connected();
+  };
 
   // Writes given message to defined log topic.
   // See AWS_IOT_LOG_TOPIC in settings.h
@@ -50,7 +59,7 @@ private:
   const char* m_device_shadow_name = "settings";
 
   // Your AWS IOT Core endpoint. Region specific.
-  const char* m_iot_endpoint = "<your endpoint>-ats.iot.<region>.amazonaws.com";
+  char* m_iot_endpoint;
 
   // Topic log messages will be send to.
   const char* m_log_topic = "logs";
