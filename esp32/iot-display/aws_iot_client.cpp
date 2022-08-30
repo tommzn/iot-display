@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 #include "aws_iot_client.h"
 #include "timer.h"
 
@@ -11,16 +13,30 @@
 bool AwsIotClient::connect() {
   
   // Configure WiFiClientSecure to use the AWS IoT device credentials
+  Serial.println("Applying Certs and Keys.");
   m_secure_client.setCACert(AWS_CERT_CA);
   m_secure_client.setCertificate(AWS_CERT_CRT);
   m_secure_client.setPrivateKey(AWS_CERT_PRIVATE);
 
+  // Connect to AWS IOT
+  m_iot_client.begin(m_iot_endpoint, 8883, m_secure_client);
+  // Extend default timeout because data collection may take some seconds.
+  m_iot_client.setKeepAlive(m_connection_keep_alive);
+    
+  Serial.println("Try to connect.");
   uint32_t retries = 0;
   while (!m_iot_client.connect(m_thing_name) && retries < m_max_connect_attemps) {
     retries++;
+    Serial.print("Attemp: ");
+    Serial.println(retries);
     delay(500);
   }
-
+  if (!m_iot_client.connected()) {
+    Serial.println("Failed to connect!");
+    return false;
+  } 
+  Serial.println("Connected.");
+    
   m_iot_client.begin(m_iot_endpoint, 8883, m_secure_client);
   m_iot_client.setKeepAlive(m_connection_keep_alive); 
 
