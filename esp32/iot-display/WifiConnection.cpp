@@ -52,7 +52,7 @@ bool WiFiConnection::connected() {
 void WiFiConnection::disconnect() {
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
-  Serial.print("WiFi disconnected!");
+  Serial.println("WiFi disconnected!");
 }
 
 // Returns MAC address of used device.
