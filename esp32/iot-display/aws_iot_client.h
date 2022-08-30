@@ -56,7 +56,7 @@ private:
   const char* m_log_topic = "logs";
 
   // Topic this device subsribes to, to get new content for display updates.
-  const char* m_content_topic = "contents";
+  const char* m_content_topic = ("things/" + std::string(m_thing_name) + "/contents").c_str();
 
   // Keep connection alive for given seconds, in case send/retrieve data take a little bit longer.
   uint32_t m_connection_keep_alive = 60;
