@@ -22,7 +22,7 @@
 // Include and create AWS IOT client.
 #include "aws_iot_client.h"
 #include "aws_iot_settings.h";
-AwsIotClient aws_iot_client = AwsIotClient(AWS_IOT_ENDPOINT);
+AwsIotClient aws_iot_client = AwsIotClient(AWS_IOT_ENDPOINT, AWS_IOT_THING_NAME);
 
 // Include and create WiFi connection handler.
 #include "WiFiConnection.h"
@@ -108,6 +108,7 @@ void loop() {
   // If runtime exceeds, shut down.
   if (runtimeTimer.isExpired()) {
 
+    Serial.println("");
     if (aws_iot_client.isConnected()) {
       
       String logMessage = "Stop listening and going to deep sleep for " + String(settings.getSleepTime()) + " seconds.";

@@ -11,8 +11,9 @@ public:
 
   AwsIotClient() { };
 
-  AwsIotClient(char* iot_endpoint) { 
+  AwsIotClient(char* iot_endpoint, char* thing_name) { 
     m_iot_endpoint = iot_endpoint;
+    m_thing_name   = thing_name;
   };
 
   // Opens a secure connections to AWS IOT to publish/consume messages.
@@ -53,7 +54,7 @@ private:
   uint32_t m_max_connect_attemps = AWS_IOT_MAX_CONNECT_ATTEMPS;
 
   // AWS IOT thing name for this device.
-  const char* m_thing_name = "<AWS IOT Thing Name>";
+  const char* m_thing_name;
 
   // Name of used AWS IOT device shadow.
   const char* m_device_shadow_name = "settings";
