@@ -13,7 +13,6 @@
 bool AwsIotClient::connect() {
   
   // Configure WiFiClientSecure to use the AWS IoT device credentials
-  Serial.println("Applying Certs and Keys.");
   m_secure_client.setCACert(AWS_CERT_CA);
   m_secure_client.setCertificate(AWS_CERT_CRT);
   m_secure_client.setPrivateKey(AWS_CERT_PRIVATE);
@@ -23,30 +22,29 @@ bool AwsIotClient::connect() {
   // Extend default timeout because data collection may take some seconds.
   m_iot_client.setKeepAlive(m_connection_keep_alive);
     
-  Serial.println("Try to connect.");
-  uint32_t retries = 0;
+  Serial.print("Try to connect to AWS IOT Endpoint: ");
+  Serial.println(m_iot_endpoint);
+  uint8_t retries = 0;
   while (!m_iot_client.connect(m_thing_name) && retries < m_max_connect_attemps) {
     retries++;
-    Serial.print("Attemp: ");
-    Serial.println(retries);
+    Serial.print(".");
     delay(500);
   }
-  if (!m_iot_client.connected()) {
-    Serial.println("Failed to connect!");
-    return false;
-  } 
-  Serial.println("Connected.");
-    
-  m_iot_client.begin(m_iot_endpoint, 8883, m_secure_client);
-  m_iot_client.setKeepAlive(m_connection_keep_alive); 
-
+  Serial.println("");
+  
   if (m_iot_client.connected()) {
-    m_iot_client.subscribe(m_content_topic);
-    m_iot_client.subscribe(getDeviceShadowTopic("/get/accepted"));
-    m_iot_client.subscribe(getDeviceShadowTopic("/get/rejected"));
-    m_iot_client.subscribe(getDeviceShadowTopic("/update/rejected"));
-  }  
-  return m_iot_client.connected();
+    Serial.println("Connected to AWS IOT!");
+    //m_iot_client.subscribe(m_content_topic);
+    //triggerContentGet();
+    //m_iot_client.subscribe(getDeviceShadowTopic("/get/accepted"));
+    //m_iot_client.subscribe(getDeviceShadowTopic("/get/rejected"));
+    //m_iot_client.subscribe(getDeviceShadowTopic("/update/rejected"));
+    return true;
+  } else {
+    Serial.println("Unable to connected to AWS IOT!");
+    logError();
+    return false;
+  }
 }
 
 // Disconnects from AWS IOT with some delay defined by m_disconnect_delay.
@@ -57,11 +55,7 @@ bool AwsIotClient::disconnect() {
   timer.start(m_disconnect_delay);
   while (!timer.isExpired()) {
     loop();
+    delay(100);
   }
-  m_iot_client.disconnect();
-}
-
-// Send given message to log topic defined by AWS_IOT_LOG_TOPIC.
-void AwsIotClient::publishLogMessage(const char* message) {
-  m_iot_client.publish(m_log_topic, message);
+  return m_iot_client.disconnect();
 }
