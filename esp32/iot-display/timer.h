@@ -9,7 +9,7 @@ public:
   
   Timer() { };
   
-  void start(int duration_seconds) {
+  void start(uint8_t duration_seconds) {
     m_end_at = millis() + duration_seconds * mS_TO_S_FACTOR;
   };
 
