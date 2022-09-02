@@ -22,7 +22,7 @@
 // Include and create AWS IOT client.
 #include "aws_iot_client.h"
 #include "aws_iot_settings.h";
-AwsIotClient aws_iot_client = AwsIotClient(AWS_IOT_ENDPOINT, AWS_IOT_THING_NAME);
+AwsIotClient aws_iot_client = AwsIotClient(AWS_IOT_ENDPOINT, AWS_IOT_THING_NAME, AWS_IOT_MAX_CONNECT_ATTEMPS);
 
 // Include and create WiFi connection handler.
 #include "WiFiConnection.h"
@@ -85,12 +85,9 @@ void setup() {
       // ...try to connect to AWS IOT.
       Serial.println("Connecting to AWS IOT.");
       if (aws_iot_client.connect()) {
-        Serial.println("Connected to AWS IOT!");
         // Assign handler for incoming messages.
-        aws_iot_client.handleMessage(handleAwsIotMessage);
-        aws_iot_client.publishLogMessage("Subscribed to content topic. Waiting for updates.");
-      } else {
-        Serial.println("Unable to connect to AWS IOT!");
+        //aws_iot_client.handleMessage(handleAwsIotMessage);
+        aws_iot_client.publishInfoLogMessage("Subscribed to content topic. Waiting for updates.");
       }
   }
 
@@ -112,12 +109,13 @@ void loop() {
     if (aws_iot_client.isConnected()) {
       
       String logMessage = "Stop listening and going to deep sleep for " + String(settings.getSleepTime()) + " seconds.";
-      aws_iot_client.publishLogMessage(logMessage.c_str());
-    
+      aws_iot_client.publishInfoLogMessage(logMessage.c_str());
+      
       // @ToDo: Publish current settings to device shadow.
     
       // Disconnect from AWS IOT
       aws_iot_client.disconnect();
+      aws_iot_client.logError();
     }
     
     // Disconnect from WiFi
