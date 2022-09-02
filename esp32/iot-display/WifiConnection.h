@@ -10,7 +10,7 @@
 class WiFiConnection {
 public:
 
-  WiFiConnection(char* ssid, char* password, int max_connect_attemps);
+  WiFiConnection(const char* ssid, const char* password, uint8_t max_connect_attemps);
 
   // Will try to connet to defined Wifi with given credentials.
   // Returns true on success or false in case of errors.
@@ -31,13 +31,13 @@ public:
 private:
 
   // Max. WiFi connect attemps. If exceeded connect() will reutrn with false.
-  int m_connect_attemps;
+  uint8_t m_connect_attemps;
 
   // WiFi SSID
-  char* m_ssid;
+  const char* m_ssid;
 
   // WiFi Password
-  char* m_password;
+  const char* m_password;
   
 };
 #endif 

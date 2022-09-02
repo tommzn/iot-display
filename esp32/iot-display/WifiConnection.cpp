@@ -7,7 +7,7 @@
 #include "Arduino.h"
 
 // Create a new conneciton handler and pass credentials and settings.
-WiFiConnection::WiFiConnection(char* ssid, char* password, int max_connect_attemps) {
+WiFiConnection::WiFiConnection(const char* ssid, const char* password, uint8_t max_connect_attemps) {
   m_connect_attemps = max_connect_attemps;
   m_ssid = ssid;
   m_password = password;
