@@ -4,42 +4,36 @@
     {
       "Effect": "Allow",
       "Action": "iot:Connect",
-      "Resource": "arn:aws:iot:<AwsRegion>:<AwsAccountId>:client/<ThingName>"
+      "Resource": "arn:aws:iot:<AwsRegion>:<AwsAccountId>:client/${iot:Connection.Thing.ThingName}"
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "iot:Publish"
-      ],
+      "Action": "iot:Publish",
       "Resource": [
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/<ThingName>/shadow/name/<ShadowName>/get",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/<ThingName>/shadow/name/<ShadowName>/update",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/things/<ThingName>/logs/*",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/things/<ThingName>/contents/get"
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/logs",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/things/${iot:Connection.Thing.ThingName}/contents/get",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/get",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/update"
       ]
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "iot:Receive"
-      ],
+      "Action": "iot:Receive",
       "Resource": [
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/<ThingName>/shadow/name/<ShadowName>/get/accepted",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/<ThingName>/shadow/name/<ShadowName>/get/rejected",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/<ThingName>/shadow/name/<ShadowName>/update/rejected",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/things/<ThingName>/contents"
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/things/${iot:Connection.Thing.ThingName}/contents",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/get/accepted",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/get/rejected",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/update/rejected"
       ]
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "iot:Subsribe"
-      ],
+      "Action": "iot:Subscribe",
       "Resource": [
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/$aws/things/<ThingName>/shadow/name/<ShadowName>/get/accepted",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/$aws/things/<ThingName>/shadow/name/<ShadowName>/get/rejected",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/$aws/things/<ThingName>/shadow/name/<ShadowName>/update/rejected",
-        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topic/iotdisplay/things/<ThingName>/contents"
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/iotdisplay/things/${iot:Connection.Thing.ThingName}/contents",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/get/accepted",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/get/rejected",
+        "arn:aws:iot:<AwsRegion>:<AwsAccountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/settings/update/rejected"
       ]
     }
   ]
