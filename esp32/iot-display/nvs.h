@@ -43,6 +43,16 @@ public:
   void setSleepTime(uint32_t sleep_time) {
     m_preferences->putUInt(m_key_sleep_time, sleep_time);
   };
+
+  // Returns persisted content hash.
+  String getContentHash() {
+    return m_preferences->getString(m_key_content_hash, "");
+  };
+
+  // Persit given deep sleep time.
+  void setContentHash(String hash) {
+    m_preferences->putString(m_key_content_hash, hash);
+  };
   
 private:
 
@@ -53,7 +63,10 @@ private:
   uint32_t m_default_sleep_time;
 
   // Key to be used to read/write deep sleep settings.
-  const char m_key_sleep_time[16] = "esp32.deepsleep";
+  const char* m_key_sleep_time = "deepsleep";
+
+  // Key to be used to read/write content hash.
+  const char* m_key_content_hash = "contenthash";
 };
 
 #endif 
