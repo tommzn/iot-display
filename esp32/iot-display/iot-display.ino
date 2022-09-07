@@ -60,23 +60,18 @@ void handleAwsIotMessage(String &topic, String &payload) {
   } 
 
   if (topic.endsWith("get/accepted")) {
-    Serial.println("Shadow data received, topic: " + topic);
     processDeviceShadow(payload);
     return;
   }
 
    if (topic.endsWith("/contents")) {
-    Serial.println("Content received, topic: " + topic);
     processContent(payload);
     return;
   }
-  Serial.println("incoming: " + topic + " - " + payload);
 }
 
 void processDeviceShadow(String &json) {
 
-  Serial.println("Device Shadow (JSON): " + json);
-  
   StaticJsonDocument<512> device_shadow;
   DeserializationError error = deserializeJson(device_shadow, json);
   if (error) {
@@ -101,8 +96,6 @@ void processDeviceShadow(String &json) {
 
 void processContent(String &contentAsJson) {
 
-  Serial.println("Content (JSON): " + contentAsJson);
-  
   StaticJsonDocument<1024> content;
   DeserializationError error = deserializeJson(content, contentAsJson);
   if (error) {
@@ -126,11 +119,8 @@ void processContent(String &contentAsJson) {
   }
 
   if (content.containsKey("items")) { 
-    Serial.println(F("Run content refresh for screen."));
     JsonArray items = content["items"].as<JsonArray>();
     drawContent(items);
-  } else {
-    Serial.println(F("No items available."));
   }
 }
 
@@ -147,6 +137,8 @@ void enterDeepSleep(uint32_t secondsToSleep) {
   Serial.flush(); 
   esp_deep_sleep_start();
 }
+
+// drawContent will iterate trough passed items and draw their text on screen.
 void drawContent(JsonArray& items) {
 
   if (items.size() == 0) {
@@ -163,22 +155,13 @@ void drawContent(JsonArray& items) {
 
       uint16_t x = item["position"]["x"];
       uint16_t y = item["position"]["y"];
-      Serial.println("Position, X: " + String(x) + ", Y: " + String(y));
-    
       String text = item["text"];
-      Serial.println("Text: " + text);
-    
       display.setCursor(x, y);
       display.print(text);
-      
-    } else {
-      Serial.println(F("Missing position or text"));
     }
   }
-
-  Serial.println(F("Start display update"));
   display.update();
-  Serial.println(F("End display update"));
+  
 }
 
 void setup() {
