@@ -36,6 +36,20 @@ Settings settings(&preferences, SECONDS_TO_SLEEP);
 #include "timer.h"
 Timer runtimeTimer;
 
+// Display setup
+#include <GxEPD.h>
+#include <GxGDEW0583T7/GxGDEW0583T7.h> // Waveshare 5.83" b/w
+
+#include <GxIO/GxIO_SPI/GxIO_SPI.h>
+#include <GxIO/GxIO.h>
+
+#include <Fonts/FreeMono9pt7b.h>
+#include <Fonts/FreeMonoBold9pt7b.h>
+#include <Fonts/FreeMonoBold12pt7b.h>
+
+GxIO_Class io(SPI, 15, 27, 26);
+GxEPD_Class display(io, 26, 25);
+
 // Handler for incoming messages from AWS IOT.
 void handleAwsIotMessage(String &topic, String &payload) {
 
@@ -110,9 +124,14 @@ void processContent(String &contentAsJson) {
     // Persist new content hash for future updates.
     settings.setContentHash(contentHash);
   }
-  
-  Serial.println(F("Run content refresh for screen."));
-  // @ToDo: Implement display client to update contents on screen
+
+  if (content.containsKey("items")) { 
+    Serial.println(F("Run content refresh for screen."));
+    JsonArray items = content["items"].as<JsonArray>();
+    drawContent(items);
+  } else {
+    Serial.println(F("No items available."));
+  }
 }
 
 // Will start deep sleep for defined number of seconds.
@@ -127,6 +146,39 @@ void enterDeepSleep(uint32_t secondsToSleep) {
   Serial.println("Going to deep sleep now!");
   Serial.flush(); 
   esp_deep_sleep_start();
+}
+void drawContent(JsonArray& items) {
+
+  if (items.size() == 0) {
+    return;
+  }
+  
+  display.setFont(&FreeMonoBold9pt7b);
+  display.fillScreen(GxEPD_WHITE);
+
+  for (JsonArray::iterator it=items.begin(); it!=items.end(); ++it) {
+
+    JsonObject item = it->as<JsonObject>();
+    if (item.containsKey("text") && item.containsKey("position")) { 
+
+      uint16_t x = item["position"]["x"];
+      uint16_t y = item["position"]["y"];
+      Serial.println("Position, X: " + String(x) + ", Y: " + String(y));
+    
+      String text = item["text"];
+      Serial.println("Text: " + text);
+    
+      display.setCursor(x, y);
+      display.print(text);
+      
+    } else {
+      Serial.println(F("Missing position or text"));
+    }
+  }
+
+  Serial.println(F("Start display update"));
+  display.update();
+  Serial.println(F("End display update"));
 }
 
 void setup() {
@@ -167,6 +219,14 @@ void setup() {
       }
   }
 
+  display.init();             
+  display.setTextColor(GxEPD_BLACK);
+  
+  // release standard SPI pins, e.g. SCK(18), MISO(19), MOSI(23), SS(5)
+  SPI.end();                  
+  // map and init SPI pins SCK(13), MISO(12), MOSI(14), SS(15)
+  SPI.begin(13, 12, 14, 15);  
+  
   runtimeTimer.start(MAX_RUNTIME_SECONDS);
 }
 
@@ -202,6 +262,9 @@ void loop() {
     // Close settings manager
     uint32_t secondsToSleep = settings.getSleepTime();
     settings.end();
+
+    // Power off display
+    display.powerDown();
 
     // Going to deep sleep for defined number of seconds
     // See SECONDS_TO_SLEEP in settings.h for default value
