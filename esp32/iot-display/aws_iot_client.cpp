@@ -15,7 +15,7 @@ void AwsIotClient::begin() {
   m_secure_client.setCertificate(AWS_CERT_CRT);
   m_secure_client.setPrivateKey(AWS_CERT_PRIVATE);
 
-  // Connect to AWS IOT
+  // Assign connection settings.
   m_iot_client.begin(m_iot_endpoint, 8883, m_secure_client);
   // Extend default timeout because data collection may take some seconds.
   m_iot_client.setKeepAlive(m_connection_keep_alive);
@@ -25,10 +25,6 @@ void AwsIotClient::begin() {
 // Connects to AWS IOT endpoint specified by AWS_IOT_ENDPOINT using thing name from AWS_IOT_THING_NAME.
 bool AwsIotClient::connect() {
 
-  Serial.println();
-  Serial.print("Try to connect to AWS IOT Endpoint: ");
-  Serial.println(m_iot_endpoint);
-  
   uint8_t retries = 0;
   while (!m_iot_client.connect(m_thing_name) && retries < m_max_connect_attemps) {
     retries++;
