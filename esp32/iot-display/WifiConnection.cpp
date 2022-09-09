@@ -4,7 +4,6 @@
 
 #include "WiFiConnection.h"
 #include "WiFi.h"
-#include "Arduino.h"
 
 // Create a new conneciton handler and pass credentials and settings.
 WiFiConnection::WiFiConnection(const char* ssid, const char* password, uint8_t max_connect_attemps) {
@@ -25,22 +24,13 @@ bool WiFiConnection::connect() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(m_ssid, m_password);
 
-  Serial.print("Try to connect to WiFi ");
-  Serial.print(m_ssid);
   int retries = 0;
   while (WiFi.status() != WL_CONNECTED && retries < m_connect_attemps) {
     delay(500);
-    Serial.print(".");
     retries++;
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("Success");
-    return true;
-  } else {
-    Serial.println("Failed");
-    return false;
-  }
+  return WiFi.status() == WL_CONNECTED;
 }
 
 // Returns true if there's a connection to defined WiFi.
@@ -52,7 +42,6 @@ bool WiFiConnection::connected() {
 void WiFiConnection::disconnect() {
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
-  Serial.println("WiFi disconnected!");
 }
 
 // Returns MAC address of used device.
