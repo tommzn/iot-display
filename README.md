@@ -35,7 +35,7 @@ Device settings are managed via AWS IOT device shadow service. It's used to mana
 There's an example implementation of a content manager which sends new contents to 'iotdisplay/things/<ThingName>/contents' topic at [IOT-Display ContentManager](https://github.com/tommzn/iotdisplay-contentmanager). It subscribes to 'iotdisplay/things/<ThingName>/contents/get' topic and simply returns thing name along with current timestamp on 'iotdisplay/things/<ThingName>/contents' topic.
 
 ## Logging
-With an active AWS IOT connection the device sends logs to 'iotdisplay/logs' topic. You can subscribe to this topic to process this logs. [IOT-Display LogForwarder](https://github.com/tommzn/iotdisplay-logforwarder) provides an example implementation to collect this logs and forward them to Logz.io.
+With an active AWS IOT connection the device sends logs to 'iotdisplay/logs' topic. You can subscribe to this topic to process this logs. [IOT-Display LogHandler](https://github.com/tommzn/iotdisplay-loghandler) provides an example implementation to collect this logs and forward them to Logz.io.
 
 # Setup
 This project provides an Arduino sketch you can upload to your ESP32. See [ESP32 Sketch](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display).
