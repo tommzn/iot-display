@@ -50,22 +50,28 @@ Timer runtimeTimer;
 GxIO_Class io(SPI, 15, 27, 26);
 GxEPD_Class display(io, 26, 25);
 
+#include "contentmgr.h"
+ContentManager contentManager(&display, &settings);
+
 // Handler for incoming messages from AWS IOT.
 void handleAwsIotMessage(String &topic, String &payload) {
 
+  // Log rejected requests.
   if (topic.endsWith("rejected")) {
     Serial.println("Reject received, topic: " + topic);
     Serial.println("Reason: " + payload);
     return;
   } 
 
+  // For any response to shadow get, process current shadow data.
   if (topic.endsWith("get/accepted")) {
     processDeviceShadow(payload);
     return;
   }
 
-   if (topic.endsWith("/contents")) {
-    processContent(payload);
+  // Process content and update displayed values if necessary.
+  if (topic.endsWith("/contents")) {
+    contentManager.processContent(payload);
     return;
   }
 }
@@ -80,48 +86,44 @@ void processDeviceShadow(String &json) {
     return;
   }
 
-  JsonObject deviceState = device_shadow["state"];
   // If device shadow contains a delta, get deep sleep settings.
-  if (deviceState.containsKey("delta")) { 
-
-    JsonObject deltaState = deviceState["delta"];
-    if (deltaState.containsKey("deep_sleep_seconds")) {
-
-      uint32_t deep_sleep_seconds = deltaState["deep_sleep_seconds"];
-      Serial.println("New deep sleep seconds: " + String(deep_sleep_seconds));
-      settings.setSleepTime(deep_sleep_seconds);
-    }
+  JsonVariant deep_sleep = device_shadow["state"]["delta"]["deep_sleep_seconds"];
+  if (!deep_sleep.isNull()) {
+    uint32_t deep_sleep_seconds =  deep_sleep.as<uint32_t>();
+    Serial.println("New deep sleep seconds: " + String(deep_sleep_seconds));
+     settings.setSleepTime(deep_sleep_seconds);
   }
 }
 
-void processContent(String &contentAsJson) {
+// Shutdown publishes current settings to device shadow, closes all connections
+// and prepares/starts deep sleep.
+void shutdown() {
 
-  StaticJsonDocument<1024> content;
-  DeserializationError error = deserializeJson(content, contentAsJson);
-  if (error) {
-    Serial.println(F("Unable to parse content"));
-    Serial.println(error.f_str());
-    return;
+  if (aws_iot_client.isConnected()) {
+
+    // Report current  settings to device shadow.
+    aws_iot_client.updateDeviceShadow(settings.getSleepTime());
+    
+    String logMessage = "Stop listening and going to deep sleep for " + String(settings.getSleepTime()) + " seconds.";
+    aws_iot_client.publishInfoLogMessage(logMessage.c_str());
+      
+    // Disconnect from AWS IOT
+    aws_iot_client.disconnect();
   }
   
-  // If content contains a hash, compared to local hash
-  if (content.containsKey("content_hash")) { 
+  // Disconnect from WiFi
+  wifi.disconnect();
 
-    String contentHash = content["content_hash"];
-    String localContentHash = settings.getContentHash();
-    if (localContentHash == contentHash) {
-      Serial.println(F("Content has not changed. No update required."));
-      return;
-    }
+  // Close settings manager
+  uint32_t secondsToSleep = settings.getSleepTime();
+  settings.end();
 
-    // Persist new content hash for future updates.
-    settings.setContentHash(contentHash);
-  }
+  // Power off display
+  display.powerDown();
 
-  if (content.containsKey("items")) { 
-    JsonArray items = content["items"].as<JsonArray>();
-    drawContent(items);
-  }
+  // Going to deep sleep for defined number of seconds
+  // See SECONDS_TO_SLEEP in settings.h for default value
+  enterDeepSleep(secondsToSleep);
 }
 
 // Will start deep sleep for defined number of seconds.
@@ -138,32 +140,6 @@ void enterDeepSleep(uint32_t secondsToSleep) {
   esp_deep_sleep_start();
 }
 
-// drawContent will iterate trough passed items and draw their text on screen.
-void drawContent(JsonArray& items) {
-
-  if (items.size() == 0) {
-    return;
-  }
-  
-  display.setFont(&FreeMonoBold9pt7b);
-  display.fillScreen(GxEPD_WHITE);
-
-  for (JsonArray::iterator it=items.begin(); it!=items.end(); ++it) {
-
-    JsonObject item = it->as<JsonObject>();
-    if (item.containsKey("text") && item.containsKey("position")) { 
-
-      uint16_t x = item["position"]["x"];
-      uint16_t y = item["position"]["y"];
-      String text = item["text"];
-      display.setCursor(x, y);
-      display.print(text);
-    }
-  }
-  display.update();
-  
-}
-
 void setup() {
 
   // Init serial output
@@ -174,29 +150,24 @@ void setup() {
   settings.begin();
 
   // Try to connect to WiFi with given settings and credentials
-  wifi.connect();
-
-  // After WiFi connectin is established...
-  if (wifi.connected()) {
+  if (wifi.connect()) {
 
       aws_iot_client.begin();
       
       // Assign handler for incoming messages.
       aws_iot_client.handleMessage(handleAwsIotMessage);
         
-      // Ttry to connect to AWS IOT.
-      Serial.println("Connecting to AWS IOT.");
+      // Try to connect to AWS IOT.
       if (aws_iot_client.connect()) {
-        
-        aws_iot_client.publishInfoLogMessage("Subscribed to content topic. Waiting for updates.");
-
+                
         // Subscribe to all required topics
         aws_iot_client.subsribe();
+        aws_iot_client.publishInfoLogMessage("Subscribed to content topic. Waiting for updates.");
 
         // Trigger request for shadow data.
         aws_iot_client.triggerShadowGet();
         
-        // Send message to initiate content publishing
+        // Send message to initiate content publishing.
         aws_iot_client.triggerContentGet();
     
       }
@@ -209,7 +180,8 @@ void setup() {
   SPI.end();                  
   // map and init SPI pins SCK(13), MISO(12), MOSI(14), SS(15)
   SPI.begin(13, 12, 14, 15);  
-  
+
+  // Runtime timer restricts time this device will wait for new contents.
   runtimeTimer.start(MAX_RUNTIME_SECONDS);
 }
 
@@ -221,36 +193,9 @@ void loop() {
   // Send and receive messages.
   aws_iot_client.loop();
   
-  // If runtime exceeds, shut down.
   if (runtimeTimer.isExpired()) {
 
-    Serial.println("");
-    if (aws_iot_client.isConnected()) {
-      
-      String logMessage = "Stop listening and going to deep sleep for " + String(settings.getSleepTime()) + " seconds.";
-      aws_iot_client.publishInfoLogMessage(logMessage.c_str());
-      
-      // @ToDo: Publish current settings to device shadow.
-
-      // Report current  settings to device shadow.
-      aws_iot_client.updateDeviceShadow(settings.getSleepTime());
-        
-      // Disconnect from AWS IOT
-      aws_iot_client.disconnect();
-    }
-    
-    // Disconnect from WiFi
-    wifi.disconnect();
-  
-    // Close settings manager
-    uint32_t secondsToSleep = settings.getSleepTime();
-    settings.end();
-
-    // Power off display
-    display.powerDown();
-
-    // Going to deep sleep for defined number of seconds
-    // See SECONDS_TO_SLEEP in settings.h for default value
-    enterDeepSleep(secondsToSleep);
+    // Stop processing and going to deep sleep.
+    shutdown();
   }
 }
