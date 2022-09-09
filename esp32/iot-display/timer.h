@@ -4,6 +4,8 @@
 #define TIMER_H
 
 
+// Timer can be used to trace a time range.
+// You can set a duration in seconds and check if this time range is expired in the meantime.
 class Timer {
 public:
   
