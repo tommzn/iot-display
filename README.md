@@ -60,5 +60,5 @@ You'll need something that publishes new contents to 'iotdisplay/things/<ThingNa
 - [ESP32 Sketch](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display)
 - [AWS IOT Setup](https://github.com/tommzn/iot-display/tree/main/aws)
 - [IOT-Display ContentManager](https://github.com/tommzn/iotdisplay-contentmanager)
-- [IOT-Display LogForwarder](https://github.com/tommzn/iotdisplay-logforwarder)
+- [IOT-Display LogHandler](https://github.com/tommzn/iotdisplay-loghandler)
 
