@@ -46,9 +46,9 @@ Have a look at [AWS IOT Setup](https://github.com/tommzn/iot-display/tree/main/a
 
 ## Add Certs, Keys and Endpoint
 After you've created all required AWS IOT resources please adjust folloeing settings.
-- Add AWS Root CA certificate to AWS_CERT_CA in [aws_iot_certs.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-displayaws_iot_certs.h)
-- Add client certificate to AWS_CERT_CRT in [aws_iot_certs.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-displayaws_iot_certs.h)
-- Add private key to AWS_CERT_PRIVATE in [aws_iot_certs.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-displayaws_iot_certs.h)
+- Add AWS Root CA certificate to AWS_CERT_CA in [aws_iot_certs.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display/aws_iot_certs.h)
+- Add client certificate to AWS_CERT_CRT in [aws_iot_certs.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display/aws_iot_certs.h)
+- Add private key to AWS_CERT_PRIVATE in [aws_iot_certs.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display/aws_iot_certs.h)
 - Adjust AWS IOT endpoint corresponding to your AWS region at AWS_IOT_ENDPOINT in [aws_iot_settings.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display/aws_iot_settings.h)
 - Update AWS IOT thing name at AWS_IOT_THING_NAME in [aws_iot_settings.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display/aws_iot_settings.h)
 - Provide your Wifi credentials in [wifi_credentials.h](https://github.com/tommzn/iot-display/tree/main/esp32/iot-display/wifi_credentials.h)
