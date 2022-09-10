@@ -53,6 +53,18 @@ aws iot attach-policy \
     --target <CertificateArn>
 ```
 
+## Create device shadow with default settings
+To be able to use an AWS IOT device shadow to update settings, e.g. deep sleep time, you've to create this shadow first.
+Here "settings" is used as shadow name. File device_shadow.json contains an example shadow payload.
+```bash
+aws iot-data update-thing-shadow \
+    --thing-name <ThingName> \
+    --shadow-name settings \
+    --cli-binary-format raw-in-base64-out \
+    --payload '{"state":{"desired":{"deep_sleep_seconds":60}}}' \
+    <ThingName>_settings.json
+```
+
 # Fetch additional resources
 In addition to a thing, certificate, keys and a policy we've to fetch AWS IOT endpoint for used region and the AWS Root CA certificate.
 
@@ -60,7 +72,8 @@ In addition to a thing, certificate, keys and a policy we've to fetch AWS IOT en
 Following command returns AWS IOT endpoint which have to be added to the aws_iot_client.h in iot-display sources.
 If AWS_REGION is not set, you've to add --region param to specify your AWS region.
 ```bash
-aws iot describe-endpoint
+aws iot describe-endpoint \ 
+    --endpoint-type iot:Data-ATS
 ```
 
 ## Get AWS Root CA certificate
