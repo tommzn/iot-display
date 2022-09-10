@@ -110,8 +110,27 @@ else
     exit 1
 fi
 
+# Create device shadow for settings, including default value for deep sleep time
+echo
+echo -n "Creating device shadow with default settings..."
+aws iot-data update-thing-shadow \
+    --thing-name "$THING_NAME" \
+    --shadow-name "$SHADOW_NAME" \
+    --cli-binary-format raw-in-base64-out \
+    --payload "$(<device_shadow.json)" \
+    --region "$AWS_REGION" \
+    "$THING_NAME_$SHADOW_NAME.json"
+if [ $? -eq 0 ]; then 
+    echo " Done." 
+else
+    echo " Failed."
+    exit 1
+fi
+
 # Get AWS IOT endpoint in used region
-aws iot describe-endpoint --region "$AWS_REGION" | jq '.endpointAddress' | awk -v aws_region="$AWS_REGION" '{print "\nAWS IOT endpoint for region " aws_region ": "$1" " }'
+aws iot describe-endpoint \
+    --endpoint-type iot:Data-ATS \
+    --region "$AWS_REGION" | jq '.endpointAddress' | awk -v aws_region="$AWS_REGION" '{print "\nAWS IOT endpoint for region " aws_region ": "$1" " }'
 
 # Download AWS Root CA certificate if it not yet exists in local directory.
 if [ ! -f "$ROOT_CA_CERT_FILE" ]; then 
